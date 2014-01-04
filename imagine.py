@@ -18,7 +18,8 @@ class ImageDownloaderMixin(object):
             raise tornado.web.HTTPError(404, "Error: %s" % response.error)
             self.finish()
         else:
-            self.process_image(Image(file=response.body))
+            with Image(file=response.body) as img:
+                self.process_image(img)
 
     def process_image(self, img):
         raise NotImplementedError
@@ -34,11 +35,16 @@ class ResizeHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
         img.transform(resize=self.proportions)
+        self.write(img.make_blob())
+        self.finish()
 
     @tornado.web.asynchronous
     def get(self, proportions):
         self.proportions = proportions
-        self.write("Imagine this!")
+        try:
+            self.download_image(self.get_argument('img'))
+        except MissingArgumentError:
+            raise tornado.web.HTTPError(404, "Error: No img") # FIXME!
 
 
 
@@ -46,22 +52,32 @@ class CropHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
         img.transform(crop=self.proportions)
+        self.write(img.make_blob())
+        self.finish()
 
     @tornado.web.asynchronous
     def get(self, proportions):
         self.proportions = proportions
-        self.write("Imagine this!")
+        try:
+            self.download_image(self.get_argument('img'))
+        except MissingArgumentError:
+            raise tornado.web.HTTPError(404, "Error: No img") # FIXME!
 
 
 class MagicHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
         img.liquid_rescale(*self.proportions)
+        self.write(img.make_blob())
+        self.finish()
 
     @tornado.web.asynchronous
     def get(self, proportions):
         self.proportions = proportions.split('x')
-        self.write("Imagine this!")
+        try:
+            self.download_image(self.get_argument('img'))
+        except MissingArgumentError:
+            raise tornado.web.HTTPError(404, "Error: No img") # FIXME!
 
 
 application = tornado.web.Application([
