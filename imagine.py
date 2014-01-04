@@ -25,7 +25,7 @@ class ImageProcessingMixin(object):
         raise NotImplementedError('Override me please')
 
     def respond_with_image(self, img):
-        self.set_header('Content-Type', image.mimetype)
+        self.set_header('Content-Type', img.mimetype)
         self.write(img.make_blob())
         self.finish()
 
