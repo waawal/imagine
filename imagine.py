@@ -50,16 +50,16 @@ class ResizeHandler(ImageProcessingMixin, tornado.web.RequestHandler):
             raise tornado.web.HTTPError(404, "Error: No img") # FIXME!
 
 
-
 class CropHandler(ImageProcessingMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
-        img.transform(crop=self.proportions)
+        img.crop(*self.proportions)
         self.respond_with_image(img)
 
     @tornado.web.asynchronous
-    def get(self, proportions):
-        self.proportions = proportions
+    def get(self, *args):
+        # left, top, right, bottom
+        self.proportions = [int(arg) for arg in args]
         try:
             self.download_image(self.get_argument('img'))
         except MissingArgumentError:
@@ -84,7 +84,7 @@ class MagicHandler(ImageProcessingMixin, tornado.web.RequestHandler):
 application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/resize/(.*)", ResizeHandler),
-    (r"/crop/(.*)", CropHandler),
+    (r"/crop/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)", CropHandler),
     (r"/magic/(.*)", MagicHandler),
 ])
 
