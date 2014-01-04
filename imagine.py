@@ -15,6 +15,8 @@ class ImageDownloaderMixin(object):
     def download_callback(self, response):
         if response.error:
             print("Error:", response.error)
+            raise tornado.web.HTTPError(404, "Error: %s" % response.error)
+            self.finish()
         else:
             self.process_image(Image(file=response.body))
 
