@@ -36,7 +36,8 @@ class ResizeHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
         raise NotImplementedError
 
     @tornado.web.asynchronous
-    def get(self):
+    def get(self, proportions):
+        self.proportions = proportions
         self.write("Imagine this!")
 
 
@@ -47,7 +48,8 @@ class CropHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
         raise NotImplementedError
 
     @tornado.web.asynchronous
-    def get(self):
+    def get(self, proportions):
+        self.proportions = proportions
         self.write("Imagine this!")
 
 
@@ -57,15 +59,16 @@ class MagicHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
         raise NotImplementedError
 
     @tornado.web.asynchronous
-    def get(self):
+    def get(self, proportions):
+        self.proportions = proportions
         self.write("Imagine this!")
 
 
 application = tornado.web.Application([
     (r"/", MainHandler),
-    (r"/resize/", ResizeHandler),
-    (r"/crop/", CropHandler),
-    (r"/magic/", MagicHandler),
+    (r"/resize/(.*)", ResizeHandler),
+    (r"/crop/(.*)", CropHandler),
+    (r"/magic/(.*)", MagicHandler),
 ])
 
 
