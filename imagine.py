@@ -74,7 +74,7 @@ class MagicHandler(ImageProcessingMixin, tornado.web.RequestHandler):
 
     @tornado.web.asynchronous
     def get(self, proportions):
-        self.proportions = proportions.split('x')
+        self.proportions = [int(prop) for prop in proportions.split('x')]
         try:
             self.download_image(self.get_argument('img'))
         except MissingArgumentError:
