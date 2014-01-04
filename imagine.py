@@ -6,7 +6,7 @@ import tornado.httpclient
 from tornado.options import define, parse_command_line
 
 
-class ImageDownloaderMixin(object):
+class ImageProcessingMixin(object):
 
     def download_image(self, url):
         http_client = tornado.httpclient.AsyncHTTPClient()
@@ -22,8 +22,12 @@ class ImageDownloaderMixin(object):
                 self.process_image(img)
 
     def process_image(self, img):
-        raise NotImplementedError
+        raise NotImplementedError('Override me please')
 
+    def respond_with_image(self, img):
+        self.set_header('Content-Type', image.mimetype)
+        self.write(img.make_blob())
+        self.finish()
 
 class MainHandler(tornado.web.RequestHandler):
 
@@ -31,12 +35,11 @@ class MainHandler(tornado.web.RequestHandler):
         self.write("Imagine this!")
 
 
-class ResizeHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
+class ResizeHandler(ImageProcessingMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
         img.transform(resize=self.proportions)
-        self.write(img.make_blob())
-        self.finish()
+        self.respond_with_image(img)
 
     @tornado.web.asynchronous
     def get(self, proportions):
@@ -48,12 +51,11 @@ class ResizeHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
 
 
 
-class CropHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
+class CropHandler(ImageProcessingMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
         img.transform(crop=self.proportions)
-        self.write(img.make_blob())
-        self.finish()
+        self.respond_with_image(img)
 
     @tornado.web.asynchronous
     def get(self, proportions):
@@ -64,12 +66,11 @@ class CropHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
             raise tornado.web.HTTPError(404, "Error: No img") # FIXME!
 
 
-class MagicHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
+class MagicHandler(ImageProcessingMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
         img.liquid_rescale(*self.proportions)
-        self.write(img.make_blob())
-        self.finish()
+        self.respond_with_image(img)
 
     @tornado.web.asynchronous
     def get(self, proportions):
