@@ -33,7 +33,7 @@ class MainHandler(tornado.web.RequestHandler):
 class ResizeHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
-        raise NotImplementedError
+        img.transform(resize=self.proportions)
 
     @tornado.web.asynchronous
     def get(self, proportions):
@@ -45,7 +45,7 @@ class ResizeHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
 class CropHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
-        raise NotImplementedError
+        img.transform(crop=self.proportions)
 
     @tornado.web.asynchronous
     def get(self, proportions):
@@ -56,11 +56,11 @@ class CropHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
 class MagicHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
 
     def process_image(self, img):
-        raise NotImplementedError
+        img.liquid_rescale(*self.proportions)
 
     @tornado.web.asynchronous
     def get(self, proportions):
-        self.proportions = proportions
+        self.proportions = proportions.split('x')
         self.write("Imagine this!")
 
 
