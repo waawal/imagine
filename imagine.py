@@ -18,7 +18,7 @@ class ImageDownloaderMixin(object):
             raise tornado.web.HTTPError(404, "Error: %s" % response.error)
             self.finish()
         else:
-            with Image(file=response.body) as img:
+            with Image(file=response.buffer) as img:
                 self.process_image(img)
 
     def process_image(self, img):
