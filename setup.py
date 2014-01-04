@@ -8,7 +8,7 @@ except ImportError:
 with open('README.rst') as file:
     long_description = file.read()
 
-with open('requirements.txt') as file
+with open('requirements.txt') as file:
     requirements = file.read()
 
 setup(
