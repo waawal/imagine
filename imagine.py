@@ -2,25 +2,59 @@ from wand.image import Image
 
 import tornado.ioloop
 import tornado.web
+import tornado.httpclient
 from tornado.options import define, parse_command_line
 
 
+class ImageDownloaderMixin(object):
+
+    def download_image(self, url):
+        http_client = tornado.httpclient.AsyncHTTPClient()
+        http_client.fetch(url, self.download_callback)
+
+    def download_callback(self, response):
+        if response.error:
+            print("Error:", response.error)
+        else:
+            self.process_image(Image(file=response.body))
+
+    def process_image(self, img):
+        raise NotImplementedError
+
+
 class MainHandler(tornado.web.RequestHandler):
+
     def get(self):
         self.write("Imagine this!")
 
 
-class ResizeHandler(tornado.web.RequestHandler):
+class ResizeHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
+
+    def process_image(self, img):
+        raise NotImplementedError
+
+    @tornado.web.asynchronous
     def get(self):
         self.write("Imagine this!")
 
 
-class CropHandler(tornado.web.RequestHandler):
+
+class CropHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
+
+    def process_image(self, img):
+        raise NotImplementedError
+
+    @tornado.web.asynchronous
     def get(self):
         self.write("Imagine this!")
 
 
-class MagicHandler(tornado.web.RequestHandler):
+class MagicHandler(ImageDownloaderMixin, tornado.web.RequestHandler):
+
+    def process_image(self, img):
+        raise NotImplementedError
+
+    @tornado.web.asynchronous
     def get(self):
         self.write("Imagine this!")
 
